@@ -11,7 +11,7 @@ using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Configurations;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Extensions;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Visitors;
-
+using Microsoft.Extensions.Primitives;
 using Moq;
 
 using Newtonsoft.Json.Serialization;
@@ -65,7 +65,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.OpenApi.CLI
                 return;
             }
 
+            var query = new Mock<IQueryCollection>();
+            query.Setup(q => q[It.IsAny<string>()]).Returns(new StringValues(Array.Empty<string>()));
             var req = new Mock<IHttpRequestDataObject>();
+            req.SetupGet(p => p.Query).Returns(query.Object);
             req.SetupGet(p => p.Scheme).Returns("http");
             req.SetupGet(p => p.Host).Returns(new HostString("localhost", 7071));
 
@@ -86,7 +89,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.OpenApi.CLI
                                   .AddVisitors(collection)
                                   .Build(pi.CompiledDllPath)
                                   .RenderAsync(version.ToOpenApiSpecVersion(), format.ToOpenApiFormat())
-                                  .Result;
+                                  .GetAwaiter()
+                                  .GetResult();
             }
             catch (Exception ex)
             {
@@ -112,3 +116,4 @@ namespace Microsoft.Azure.WebJobs.Extensions.OpenApi.CLI
         }
     }
 }
+

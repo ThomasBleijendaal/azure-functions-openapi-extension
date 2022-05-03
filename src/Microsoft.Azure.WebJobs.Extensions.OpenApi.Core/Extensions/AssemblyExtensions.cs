@@ -45,6 +45,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Extensions
                 {
                     types.AddRange(ex.Types.Where(t => t != null));
                 }
+                catch (FileNotFoundException ex)
+                {
+                    
+                }
             }
 
             return types.Distinct().ToArray();
